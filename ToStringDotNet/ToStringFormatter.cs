@@ -7,12 +7,22 @@ using System.Text;
 
 namespace ToStringDotNet
 {
+    /// <summary>
+    /// Formats objects as strings, basing on <see cref="ToStringAttribute"/> and <see cref="ToStringInheritanceAttribute"/> placement.
+    /// </summary>
     public static class ToStringFormatter
     {
         private static readonly IDictionary<Type, object> formatter = new Dictionary<Type, object>();
         private static readonly Type tStringBuilder = typeof(StringBuilder);
         private static readonly MethodInfo mAppendString = ToStringFormatter.tStringBuilder.GetMethod("Append", new[] {typeof(string)});
 
+        /// <summary>
+        /// Prints the object as a <see cref="string"/>, according to <see cref="ToStringAttribute"/> placement on its fields and properties
+        /// </summary>
+        /// <typeparam name="T">Type of the input object</typeparam>
+        /// <param name="entity">Object to print</param>
+        /// <returns><see cref="string"/> representation of the input object</returns>
+        /// <exception cref="ToStringException">If the input object can't be printed for some reason</exception>
         public static string Format<T>(T entity)
         {
             if (entity == null) return "null";
