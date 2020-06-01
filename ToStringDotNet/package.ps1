@@ -1,0 +1,1 @@
+dotnet pack .\ToStringDotNet.csproj -c Release --version-suffix 1.0.0.0
