@@ -3,7 +3,7 @@
 namespace ToStringDotNet
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public class ToStringInheritanceAttribute : Attribute
+    public sealed class ToStringInheritanceAttribute : Attribute
     {
         public ToStringInheritanceAttribute(ToStringInheritance inheritance)
         {
