@@ -6,7 +6,7 @@ namespace ToStringDotNet
     /// Marks the field/property as a member of the ToString() method implementation
     /// </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-    public class ToStringAttribute : Attribute
+    public sealed class ToStringAttribute : Attribute
     {
         public ToStringAttribute(byte priority = 0)
         {
