@@ -60,5 +60,14 @@ namespace ToStringDotNet.Test
             const string expected = "\"1:0:00:00\"";
             Assert.Equal(expected, str);
         }
+
+        [Fact]
+        public void Test_Format_Handles_Guid()
+        {
+            var guid = Guid.NewGuid();
+            string str = ToStringFormatter.Format(guid);
+            string expected = $"\"{guid}\"";
+            Assert.Equal(expected, str);
+        }
     }
 }
