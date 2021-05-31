@@ -73,26 +73,29 @@ namespace ToStringDotNet
         {
             ToStringProp[] props = ToStringFormatter.CollectDebugProps(type);
 
-            var blockBody = new LinkedList<Expression>();
+            var isNull = Expression.Equal(entity, Expression.Constant(null));
 
-            blockBody.AddLast(Expression.Call(sb, ToStringFormatter.mAppendString, Expression.Constant("{")));
+            var ifNull = Expression.Call(sb, ToStringFormatter.mAppendString, Expression.Constant("null"));
+
+            var ifNotNull = new LinkedList<Expression>();
+            ifNotNull.AddLast(Expression.Call(sb, ToStringFormatter.mAppendString, Expression.Constant("{")));
             for (var index = 0; index < props.Length; index++)
             {
                 ToStringProp prop = props[index];
-                blockBody.AddLast(Expression.Call(sb, ToStringFormatter.mAppendString, Expression.Constant("\"")));
-                blockBody.AddLast(Expression.Call(sb, ToStringFormatter.mAppendString, Expression.Constant(prop.Name)));
-                blockBody.AddLast(Expression.Call(sb, ToStringFormatter.mAppendString, Expression.Constant("\":")));
+                ifNotNull.AddLast(Expression.Call(sb, ToStringFormatter.mAppendString, Expression.Constant("\"")));
+                ifNotNull.AddLast(Expression.Call(sb, ToStringFormatter.mAppendString, Expression.Constant(prop.Name)));
+                ifNotNull.AddLast(Expression.Call(sb, ToStringFormatter.mAppendString, Expression.Constant("\":")));
 
                 Expression propExpression = ToStringFormatter.BuildPropertyExpression(prop.PropType, sb, prop.Access(entity));
-                blockBody.AddLast(propExpression);
+                ifNotNull.AddLast(propExpression);
 
                 if (index < props.Length - 1)
-                    blockBody.AddLast(Expression.Call(sb, ToStringFormatter.mAppendString, Expression.Constant(",")));
+                    ifNotNull.AddLast(Expression.Call(sb, ToStringFormatter.mAppendString, Expression.Constant(",")));
             }
 
-            blockBody.AddLast(Expression.Call(sb, ToStringFormatter.mAppendString, Expression.Constant("}")));
+            ifNotNull.AddLast(Expression.Call(sb, ToStringFormatter.mAppendString, Expression.Constant("}")));
 
-            return Expression.Block(blockBody);
+            return Expression.IfThenElse(isNull, ifNull, Expression.Block(ifNotNull));
         }
 
         private static Expression BuildEnumerableExpression(Type type, Expression sb, Expression entity)

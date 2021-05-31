@@ -139,6 +139,15 @@ namespace ToStringDotNet.Test
         }
 
         [Fact]
+        public void Test_Format_Handles_Null_Objects()
+        {
+            var obj = new TestObject1<TestObject1<string>>(null);
+            string str = ToStringFormatter.Format(obj);
+            const string expected = "{\"Prop1\":null}";
+            Assert.Equal(expected, str);
+        }
+
+        [Fact]
         public void Test_Format_Handles_Enumerable_Props()
         {
             var obj = new TestObject1<IEnumerable<string>>(new []{"1", "2", "3"});
