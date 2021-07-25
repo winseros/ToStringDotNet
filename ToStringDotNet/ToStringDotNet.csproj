@@ -17,13 +17,13 @@
     <Title>ToStringDotNet</Title>
     <Description>The library will help you to avoid handwriting ToString methods for your .NET projects.</Description>
     <Summary>The library will help you to avoid handwriting ToString methods for your .NET projects.</Summary>
-    <Version>1.0.0</Version>
+    <Version>1.0.4</Version>
     <PackageTags>ToString</PackageTags>
     <PackageProjectUrl>https://github.com/winseros/ToStringDotNet</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl> 
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <Authors>Nikita Kobzev</Authors>
-    <Copyright>2020 Nikita Kobzev</Copyright>
+    <Copyright>2021 Nikita Kobzev</Copyright>
     <NeutralLanguage>en-US</NeutralLanguage>
   </PropertyGroup>
 

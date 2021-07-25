@@ -173,6 +173,11 @@ namespace ToStringDotNet
             sb.Append("\"").Append(value.ToString("O")).Append("\"");
         }
 
+        private static void WriteValue(StringBuilder sb, Guid value)
+        {
+            sb.Append("\"").Append(value.ToString()).Append("\"");
+        }
+
         private static void WriteValue(StringBuilder sb, sbyte value)
         {
             sb.Append(value);
