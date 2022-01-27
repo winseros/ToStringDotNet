@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -12,7 +13,7 @@ namespace ToStringDotNet
     /// </summary>
     public static class ToStringFormatter
     {
-        private static readonly IDictionary<Type, object> formatter = new Dictionary<Type, object>();
+        private static readonly ConcurrentDictionary<Type, object> formatter = new ConcurrentDictionary<Type, object>();
         private static readonly Type tStringBuilder = typeof(StringBuilder);
         private static readonly MethodInfo mAppendString = ToStringFormatter.tStringBuilder.GetMethod("Append", new[] {typeof(string)});
 
@@ -39,11 +40,11 @@ namespace ToStringDotNet
                 return;
             }
 
-            if (!ToStringFormatter.formatter.TryGetValue(typeof(T), out object printer))
+            object printer = ToStringFormatter.formatter.GetOrAdd(typeof(T), type =>
             {
-                printer = ToStringFormatter.BuildFormatter<T>();
-                ToStringFormatter.formatter[typeof(T)] = printer;
-            }
+                var p = ToStringFormatter.BuildFormatter<T>();
+                return p;
+            });
 
             ((Action<StringBuilder, T>) printer).Invoke(sb, entity);
         }
