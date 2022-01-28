@@ -171,6 +171,15 @@ namespace ToStringDotNet.Test
         }
 
         [Fact]
+        public void Test_Format_Handles_Nullable_Props()
+        {
+            var obj = new TestObject1<Guid?>(Guid.Parse("f0f003d1-892f-401f-a5e6-eda283ec8052"));
+            string str = ToStringFormatter.Format(obj);
+            const string expected = "{\"Prop1\":\"f0f003d1-892f-401f-a5e6-eda283ec8052\"}";
+            Assert.Equal(expected, str);
+        }
+
+        [Fact]
         public void Test_Format_Handles_Unknown_Objects()
         {
             var obj = new TestObject3();

@@ -61,6 +61,20 @@ namespace ToStringDotNet
 
         private static Expression BuildPropertyExpression(Type type, Expression sb, Expression entity)
         {
+            if (type.Namespace == "System" && type.Name.StartsWith("Nullable"))
+            {
+                PropertyInfo propHasValue = type.GetProperty(nameof(Nullable<int>.HasValue),
+                    BindingFlags.Public | BindingFlags.Instance);
+
+                PropertyInfo propValue = type.GetProperty(nameof(Nullable<int>.Value),
+                    BindingFlags.Public | BindingFlags.Instance);
+
+                var exprIf = Expression.Equal(Expression.Property(entity, propHasValue!), Expression.Constant(false));
+                var exprNull = Expression.Call(sb, ToStringFormatter.mAppendString, Expression.Constant("null"));
+                Expression exprNotNull = BuildPropertyExpression(type.GenericTypeArguments.First(), sb, Expression.Property(entity, propValue!));
+                return Expression.IfThenElse(exprIf, exprNull, exprNotNull);
+            }
+
             if (ToStringFormatter.BuildPredefinedExpression(type, sb, entity, out Expression expr))
                 return expr;
 
