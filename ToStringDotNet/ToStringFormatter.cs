@@ -15,6 +15,7 @@ namespace ToStringDotNet
     {
         private static readonly ConcurrentDictionary<Type, object> formatter = new ConcurrentDictionary<Type, object>();
         private static readonly Type tStringBuilder = typeof(StringBuilder);
+
         private static readonly MethodInfo mAppendString = ToStringFormatter.tStringBuilder.GetMethod("Append", new[] {typeof(string)});
 
         /// <summary>
@@ -72,31 +73,47 @@ namespace ToStringDotNet
 
         private static Expression BuildObjectExpression(Type type, Expression sb, Expression entity)
         {
-            ToStringProp[] props = ToStringFormatter.CollectDebugProps(type);
-
             var isNull = Expression.Equal(entity, Expression.Constant(null));
 
             var ifNull = Expression.Call(sb, ToStringFormatter.mAppendString, Expression.Constant("null"));
 
-            var ifNotNull = new LinkedList<Expression>();
-            ifNotNull.AddLast(Expression.Call(sb, ToStringFormatter.mAppendString, Expression.Constant("{")));
-            for (var index = 0; index < props.Length; index++)
+            Expression ifNotNull;
+            ToStringProp[] props = ToStringFormatter.CollectDebugProps(type);
+            if (props.Length == 0)
             {
-                ToStringProp prop = props[index];
-                ifNotNull.AddLast(Expression.Call(sb, ToStringFormatter.mAppendString, Expression.Constant("\"")));
-                ifNotNull.AddLast(Expression.Call(sb, ToStringFormatter.mAppendString, Expression.Constant(prop.Name)));
-                ifNotNull.AddLast(Expression.Call(sb, ToStringFormatter.mAppendString, Expression.Constant("\":")));
+                MethodInfo? toStringMethod = type.GetMethod("ToString", BindingFlags.Public | BindingFlags.Instance);
+                if (toStringMethod == null)
+                    throw new ToStringException(
+                        $"Could not stringify the type [{type.FullName}]; It has neither \"ToString()\" method nor [{typeof(ToStringAttribute).FullName}] attributes on its properties.");
+                ifNotNull = Expression.Call(sb, ToStringFormatter.mAppendString, Expression.Call(entity, toStringMethod));
+            }
+            else
+            {
+                var statements = new LinkedList<Expression>();
+                statements.AddLast(Expression.Call(sb, ToStringFormatter.mAppendString, Expression.Constant("{")));
+                for (var index = 0; index < props.Length; index++)
+                {
+                    ToStringProp prop = props[index];
+                    statements.AddLast(Expression.Call(sb, ToStringFormatter.mAppendString, Expression.Constant("\"")));
+                    statements.AddLast(Expression.Call(sb, ToStringFormatter.mAppendString,
+                        Expression.Constant(prop.Name)));
+                    statements.AddLast(Expression.Call(sb, ToStringFormatter.mAppendString,
+                        Expression.Constant("\":")));
 
-                Expression propExpression = ToStringFormatter.BuildPropertyExpression(prop.PropType, sb, prop.Access(entity));
-                ifNotNull.AddLast(propExpression);
+                    Expression propExpression =
+                        ToStringFormatter.BuildPropertyExpression(prop.PropType, sb, prop.Access(entity));
+                    statements.AddLast(propExpression);
 
-                if (index < props.Length - 1)
-                    ifNotNull.AddLast(Expression.Call(sb, ToStringFormatter.mAppendString, Expression.Constant(",")));
+                    if (index < props.Length - 1)
+                        statements.AddLast(
+                            Expression.Call(sb, ToStringFormatter.mAppendString, Expression.Constant(",")));
+                }
+
+                statements.AddLast(Expression.Call(sb, ToStringFormatter.mAppendString, Expression.Constant("}")));
+                ifNotNull = Expression.Block(statements);
             }
 
-            ifNotNull.AddLast(Expression.Call(sb, ToStringFormatter.mAppendString, Expression.Constant("}")));
-
-            return Expression.IfThenElse(isNull, ifNull, Expression.Block(ifNotNull));
+            return Expression.IfThenElse(isNull, ifNull, ifNotNull);
         }
 
         private static Expression BuildEnumerableExpression(Type type, Expression sb, Expression entity)
@@ -147,9 +164,6 @@ namespace ToStringDotNet
                                .OrderByDescending(p => p.Priority)
                                .ThenBy(p => p.Name)
                                .ToArray();
-
-            if (members.Length == 0)
-                throw new ToStringException($"Could not find any [{typeof(ToStringAttribute).FullName}] on [{type.FullName}] members");
 
             return members;
         }
@@ -253,7 +267,7 @@ namespace ToStringDotNet
                 ToStringFormatter.formatter[typeof(T)] = printer;
             }
 
-            var act = (Action<StringBuilder, T>) printer;
+            var act = (Action<StringBuilder, T>)printer;
             sb.Append("[");
 
             foreach (T item in value)

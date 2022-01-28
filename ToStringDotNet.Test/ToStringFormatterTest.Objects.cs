@@ -34,6 +34,11 @@ namespace ToStringDotNet.Test
             public string Prop3 { get; set; }
         }
 
+        public class TestObject3
+        {
+            public string Prop1 { get; set; }
+        }
+
         [Fact]
         public void Test_Format_Handles_Null()
         {
@@ -162,6 +167,15 @@ namespace ToStringDotNet.Test
             var obj = new TestObject1<IEnumerable<string>>(new []{"1", "2", "3"});
             string str = ToStringFormatter.Format(obj);
             const string expected = "{\"Prop1\":[\"1\",\"2\",\"3\"]}";
+            Assert.Equal(expected, str);
+        }
+
+        [Fact]
+        public void Test_Format_Handles_Unknown_Objects()
+        {
+            var obj = new TestObject3();
+            string str = ToStringFormatter.Format(obj);
+            const string expected = "ToStringDotNet.Test.ToStringFormatterTestObjects+TestObject3";
             Assert.Equal(expected, str);
         }
     }
