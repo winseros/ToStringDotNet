@@ -75,6 +75,12 @@ namespace ToStringDotNet
                 return Expression.IfThenElse(exprIf, exprNull, exprNotNull);
             }
 
+            if (type.IsEnum)
+            {
+                Expression enumExpr = BuildEnumExpression(type, sb, entity);
+                return enumExpr;
+            }
+
             if (ToStringFormatter.BuildPredefinedExpression(type, sb, entity, out Expression expr))
                 return expr;
 
@@ -145,7 +151,7 @@ namespace ToStringDotNet
 
         private static bool BuildPredefinedExpression(Type type, Expression sb, Expression entity, out Expression expression)
         {
-            MethodInfo method = typeof(ToStringFormatter).GetMethod("WriteValue", BindingFlags.NonPublic | BindingFlags.Static, null, new[] {ToStringFormatter.tStringBuilder, type}, new ParameterModifier[0]);
+            MethodInfo method = typeof(ToStringFormatter).GetMethod("WriteValue", BindingFlags.NonPublic | BindingFlags.Static, null, new[] {ToStringFormatter.tStringBuilder, type}, null);
             if (method != null)
             {
                 expression = Expression.Call(method, sb, entity);
@@ -156,6 +162,12 @@ namespace ToStringDotNet
             expression = null;
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
             return false;
+        }
+
+        private static Expression BuildEnumExpression(Type type, Expression sb, Expression entity)
+        {
+            MethodInfo method = typeof(ToStringFormatter).GetMethod("WriteEnum", BindingFlags.NonPublic | BindingFlags.Static);
+            return Expression.Call(method, sb, Expression.Constant(type), Expression.Convert(entity, typeof(int)));
         }
 
         private static ToStringProp[] CollectDebugProps(Type type)
@@ -293,6 +305,11 @@ namespace ToStringDotNet
             sb.Remove(sb.Length - 1, 1);
 
             sb.Append("]");
+        }
+
+        private static void WriteEnum(StringBuilder sb, Type enumType, int value)
+        {
+            sb.Append("\"").Append(value).Append("=").Append(Enum.GetName(enumType, value)).Append("\"");
         }
     }
 }

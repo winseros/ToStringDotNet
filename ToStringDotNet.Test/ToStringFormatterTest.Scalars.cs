@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using Xunit;
 
 namespace ToStringDotNet.Test
@@ -58,6 +59,14 @@ namespace ToStringDotNet.Test
         {
             string str = ToStringFormatter.Format(TimeSpan.FromDays(1));
             const string expected = "\"1:0:00:00\"";
+            Assert.Equal(expected, str);
+        }
+
+        [Fact]
+        public void Test_Format_Handles_Enums()
+        {
+            string str = ToStringFormatter.Format(HttpStatusCode.Accepted);
+            const string expected = "\"202=Accepted\"";
             Assert.Equal(expected, str);
         }
     }

@@ -17,7 +17,7 @@
     <Title>ToStringDotNet</Title>
     <Description>The library will help you to avoid handwriting ToString methods for your .NET projects.</Description>
     <Summary>The library will help you to avoid handwriting ToString methods for your .NET projects.</Summary>
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
     <PackageTags>ToString</PackageTags>
     <PackageProjectUrl>https://github.com/winseros/ToStringDotNet</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
